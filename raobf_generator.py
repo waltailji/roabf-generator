@@ -42,6 +42,7 @@ DIST_BORDER_R = DIST_R_OUTER
 OPT_BORDER_R = OPT_R_OUTER
 AOB_OUTER_BORDER_R = AOB_R_OUTER
 AOB_INNER_BORDER_R = AOB_R_OUTER - 8
+AOB_MARKER_INNER_EXTENSION = 3.0
 AOB_CROSSHAIR_HORIZONTAL_TICKS_PER_DIRECTION = 11
 AOB_CROSSHAIR_VERTICAL_TICKS_PER_DIRECTION = 10
 AOB_CROSSHAIR_EXTENT_RATIO = 0.85
@@ -56,24 +57,25 @@ NUMBER_LABEL_FONT_SIZE = 4.0
 TEXT_LABEL_FONT_SIZE = 4.5
 MARKER_LABEL_FONT_SIZE = 3.4
 MARKER_LABEL_CLOCKWISE_OFFSET_DEG = 1.0
-SHIP_ZERO_MARKER_COLOR = "#1f5fbf"
-SHIP_ZERO_MARKER_WIDTH = 0.75
-SHIP_ZERO_MARKER_COVER_WIDTH = 1.15
-SHIP_ZERO_TOP_MARKER_LENGTH = 4.0
-SHIP_BLUE_LABEL_TEXT = "6x"
-SHIP_BLUE_LABEL_R = 86.0
-SHIP_BLUE_LABEL_SPAN_DEG = 12.0
-SHIP_GREEN_MARKER_COLOR = "#1f8a3b"
-SHIP_GREEN_MARKER_WIDTH = 0.75
-SHIP_GREEN_MARKER_CLOCKWISE_DEG = 109.0
-SHIP_GREEN_LABEL_TEXT = "1.5x"
-SHIP_GREEN_LABEL_R = 86.0
-SHIP_GREEN_LABEL_SPAN_DEG = 12.0
+NUMBER_LABEL_BG_COLOR = "white"
+NUMBER_LABEL_BG_OPACITY = 0.50
+NUMBER_LABEL_BG_WIDTH = 1.6
+AOB_BLUE_MARKER_COLOR = "#1f5fbf"
+AOB_BLUE_MARKER_WIDTH = 0.75
+AOB_BLUE_LABEL_TEXT = "6x"
+AOB_BLUE_LABEL_R = 49.0
+AOB_BLUE_LABEL_SPAN_DEG = 8.0
+AOB_GREEN_MARKER_COLOR = "#1f8a3b"
+AOB_GREEN_MARKER_WIDTH = 0.75
+AOB_GREEN_MARKER_CLOCKWISE_DEG = 109.0
+AOB_GREEN_LABEL_TEXT = "1.5x"
+AOB_GREEN_LABEL_R = 49.0
+AOB_GREEN_LABEL_SPAN_DEG = 12.0
 AOB_MARKER_COLOR = "#c62828"
 AOB_MARKER_WIDTH = 0.75
 AOB_MARKER_CLOCKWISE_DEG = 13.0
 AOB_LABEL_TEXT = "kts"
-AOB_MARKER_LABEL_R = 53.0
+AOB_MARKER_LABEL_R = 49.0
 AOB_LABEL_SPAN_DEG = 14.0
 MARKER_ARROW_LENGTH = 2.4
 MARKER_ARROW_WIDTH = 1.9
@@ -161,7 +163,10 @@ def svg_text(
         transform = f' transform="rotate({math.degrees(rotation):.3f} {x:.3f} {y:.3f})"'
     return (
         f'<text x="{x:.3f}" y="{y:.3f}" font-size="{font_size:.3f}" font-family="{font_family}" '
-        f'text-anchor="middle" dominant-baseline="middle"{transform}>{text}</text>'
+        f'text-anchor="middle" dominant-baseline="middle" fill="black" '
+        f'stroke="{NUMBER_LABEL_BG_COLOR}" stroke-width="{NUMBER_LABEL_BG_WIDTH:.3f}" '
+        f'stroke-opacity="{NUMBER_LABEL_BG_OPACITY:.2f}" stroke-linejoin="round" '
+        f'paint-order="stroke fill"{transform}>{text}</text>'
     )
 
 
@@ -547,91 +552,78 @@ def build_base():
         NUMBER_LABEL_FONT_SIZE,
         tick_direction="outward",
     )
-    ship_zero_svg_ang = wheel_to_svg_angle(theta_ship(100.0))
-    x1, y1 = polar(CX, CY, SHIP_R_OUTER, ship_zero_svg_ang)
-    x2, y2 = polar(CX, CY, SHIP_R_OUTER + TICK_LENGTHS["major"], ship_zero_svg_ang)
-    elems.append(
-        svg_line(x1, y1, x2, y2, SHIP_ZERO_MARKER_COVER_WIDTH, "white")
-    )
-    elems.append(
-        svg_line(x1, y1, x2, y2, SHIP_ZERO_MARKER_WIDTH, SHIP_ZERO_MARKER_COLOR)
-    )
-    elems.append(svg_arrowhead(x1, y1, x2, y2, SHIP_ZERO_MARKER_COLOR))
-    x3, y3 = polar(CX, CY, BASE_RADIUS, ship_zero_svg_ang)
-    x4, y4 = polar(CX, CY, BASE_RADIUS - SHIP_ZERO_TOP_MARKER_LENGTH, ship_zero_svg_ang)
-    elems.append(
-        svg_line(x3, y3, x4, y4, SHIP_ZERO_MARKER_COVER_WIDTH, "white")
-    )
-    elems.append(
-        svg_line(x3, y3, x4, y4, SHIP_ZERO_MARKER_WIDTH, SHIP_ZERO_MARKER_COLOR)
-    )
-    ship_zero_wheel_deg = math.degrees(theta_ship(100.0)) % 360.0
+    aob_blue_wheel_deg = 0.0
+    aob_blue_svg_ang = wheel_to_svg_angle(math.radians(aob_blue_wheel_deg))
+    x1, y1 = polar(CX, CY, AOB_OUTER_BORDER_R, aob_blue_svg_ang)
+    x2, y2 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, aob_blue_svg_ang)
+    elems.append(svg_line(x1, y1, x2, y2, AOB_BLUE_MARKER_WIDTH, AOB_BLUE_MARKER_COLOR))
+    elems.append(svg_arrowhead(x1, y1, x2, y2, AOB_BLUE_MARKER_COLOR))
     defs.append(
         svg_path(
-            "ship_blue_label_arc",
+            "aob_blue_label_arc",
             arc_path_d(
                 CX,
                 CY,
-                SHIP_BLUE_LABEL_R,
-                ship_zero_wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
-                ship_zero_wheel_deg
-                + MARKER_LABEL_CLOCKWISE_OFFSET_DEG
-                + SHIP_BLUE_LABEL_SPAN_DEG,
+                AOB_BLUE_LABEL_R,
+                aob_blue_wheel_deg
+                - MARKER_LABEL_CLOCKWISE_OFFSET_DEG
+                - AOB_BLUE_LABEL_SPAN_DEG,
+                aob_blue_wheel_deg - MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
             ),
         )
     )
     elems.append(
         svg_text_on_arc(
-            "ship_blue_label_arc",
-            SHIP_BLUE_LABEL_TEXT,
+            "aob_blue_label_arc",
+            AOB_BLUE_LABEL_TEXT,
             MARKER_LABEL_FONT_SIZE,
             NUMBER_FONT_FAMILY,
-            SHIP_ZERO_MARKER_COLOR,
-            "0%",
-            "start",
+            AOB_BLUE_MARKER_COLOR,
+            "100%",
+            "end",
         )
     )
-    ship_green_svg_ang = ship_zero_svg_ang - math.radians(SHIP_GREEN_MARKER_CLOCKWISE_DEG)
-    x5, y5 = polar(CX, CY, BASE_RADIUS, ship_green_svg_ang)
-    x6, y6 = polar(CX, CY, SHIP_BORDER_R, ship_green_svg_ang)
+    aob_green_wheel_deg = AOB_GREEN_MARKER_CLOCKWISE_DEG % 360.0
+    aob_green_svg_ang = wheel_to_svg_angle(math.radians(aob_green_wheel_deg))
+    x5, y5 = polar(CX, CY, AOB_OUTER_BORDER_R, aob_green_svg_ang)
+    x6, y6 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, aob_green_svg_ang)
     elems.append(
-        svg_line(x5, y5, x6, y6, SHIP_GREEN_MARKER_WIDTH, SHIP_GREEN_MARKER_COLOR)
+        svg_line(x5, y5, x6, y6, AOB_GREEN_MARKER_WIDTH, AOB_GREEN_MARKER_COLOR)
     )
-    elems.append(svg_arrowhead(x6, y6, x5, y5, SHIP_GREEN_MARKER_COLOR))
-    ship_green_wheel_deg = (ship_zero_wheel_deg + SHIP_GREEN_MARKER_CLOCKWISE_DEG) % 360.0
+    elems.append(svg_arrowhead(x5, y5, x6, y6, AOB_GREEN_MARKER_COLOR))
     defs.append(
         svg_path(
-            "ship_green_label_arc",
+            "aob_green_label_arc",
             arc_path_d(
                 CX,
                 CY,
-                SHIP_GREEN_LABEL_R,
-                ship_green_wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
-                ship_green_wheel_deg
+                AOB_GREEN_LABEL_R,
+                aob_green_wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
+                aob_green_wheel_deg
                 + MARKER_LABEL_CLOCKWISE_OFFSET_DEG
-                + SHIP_GREEN_LABEL_SPAN_DEG,
+                + AOB_GREEN_LABEL_SPAN_DEG,
             ),
         )
     )
     elems.append(
         svg_text_on_arc(
-            "ship_green_label_arc",
-            SHIP_GREEN_LABEL_TEXT,
+            "aob_green_label_arc",
+            AOB_GREEN_LABEL_TEXT,
             MARKER_LABEL_FONT_SIZE,
             NUMBER_FONT_FAMILY,
-            SHIP_GREEN_MARKER_COLOR,
+            AOB_GREEN_MARKER_COLOR,
             "0%",
             "start",
         )
-    )
-    draw_scale(
-        elems, build_aob_ticks(), AOB_R_OUTER, AOB_LABEL_R, NUMBER_LABEL_FONT_SIZE
     )
     aob_marker_svg_ang = wheel_to_svg_angle(math.radians(AOB_MARKER_CLOCKWISE_DEG))
     x7, y7 = polar(CX, CY, AOB_OUTER_BORDER_R, aob_marker_svg_ang)
-    x8, y8 = polar(CX, CY, AOB_INNER_BORDER_R, aob_marker_svg_ang)
+    x8, y8 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, aob_marker_svg_ang)
     elems.append(svg_line(x7, y7, x8, y8, AOB_MARKER_WIDTH, AOB_MARKER_COLOR))
     elems.append(svg_arrowhead(x7, y7, x8, y8, AOB_MARKER_COLOR))
+    draw_scale(
+        elems, build_aob_ticks(), AOB_R_OUTER, AOB_LABEL_R, NUMBER_LABEL_FONT_SIZE
+    )
     defs.append(
         svg_path(
             "aob_marker_label_arc",
