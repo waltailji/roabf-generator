@@ -20,12 +20,16 @@ Run the generator from the project directory:
 python3 raobf_generator.py
 ```
 
-This writes the SVG outputs into the same folder.
+This writes both optical-length calibrations into the same folder:
+
+- `*_degrees.svg` for the degree-based optical scale
+- `*_mrads.svg` for the milliradian optical scale
+- `*_mrads_extended.svg` for the extended mrads base/composite variant
 
 ## Files
 
 - `raobf_generator.py`: main generator script
-- `.gitignore`: ignores generated SVG files
+- `.gitignore`: project ignore rules
 
 ## What The Script Controls
 
