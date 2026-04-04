@@ -15,34 +15,43 @@ PAGE_H = 220.0
 CX = PAGE_W / 2.0
 CY = PAGE_H / 2.0
 
-BASE_RADIUS = 89.0
-ROTOR_RADIUS = 88.0
+BASE_RADIUS = 96.0
+ROTOR_RADIUS = 95.0
 PIVOT_RADIUS = 2.25
 
-SHIP_R_OUTER = 79.0
-SHIP_LABEL_R = 83.0
-BASIS_TEXT_R = 82.0
+SHIP_R_OUTER = 86.0
+SHIP_LABEL_R = 90.0
+BASIS_TEXT_R = 89.0
 
-DIST_R_OUTER = 78.0
-DIST_LABEL_R = 73.0
-DIST_TEXT_R = 73.0
+DIST_R_OUTER = 85.0
+DIST_LABEL_R = 80.0
+DIST_TEXT_R = 80.0
 
-OPT_R_OUTER = 61.0
-OPT_LABEL_R = 65.0
-OPT_TEXT_R = 64.0
+MRAD_R_OUTER = 76.5
+MRAD_LABEL_R = 71.5
+MRAD_TEXT_R = 71.5
+
+OPT_R_OUTER = 62.0
+OPT_LABEL_R = 66.0
+OPT_TEXT_R = 64.5
 OPT_TEXT_START_WHEEL_DEG = 242.0
 OPT_TEXT_END_WHEEL_DEG = 292.0
-OPT_TEXT_MRADS_ROTATE_CCW_DEG = 44.0
+OPT_TEXT_MRADS_ROTATE_CW_DEG = 44.0
 OPT_TEXT_LABEL_START_OFFSET = "46%"
+MRAD_UNITS_START_OFFSET = "10%"
 
-AOB_R_OUTER = 60.0
-AOB_LABEL_R = 55.0
+AOB_R_OUTER = 61.0
+AOB_LABEL_R = 56.0
 AOB_TEXT_R = 54.0
+DIST_TRACK_INNER_R = MRAD_R_OUTER
+MRAD_TRACK_INNER_R = OPT_R_OUTER
+OPT_TRACK_INNER_R = 61.8
 
 TICK_LENGTHS = {"major": 2.5, "thick": 1.25, "thin": 0.625}
 STROKE_WIDTHS = {"major": 0.35, "thick": 0.35, "thin": 0.18}
 SHIP_BORDER_R = SHIP_R_OUTER
 DIST_BORDER_R = DIST_R_OUTER
+MRAD_BORDER_R = MRAD_R_OUTER
 OPT_BORDER_R = OPT_R_OUTER
 AOB_OUTER_BORDER_R = AOB_R_OUTER
 AOB_INNER_BORDER_R = AOB_R_OUTER - 8
@@ -55,6 +64,10 @@ AOB_CROSSHAIR_MINOR_TICK_LEN = 1.2
 AOB_CROSSHAIR_MAJOR_TICK_LEN = 2.2
 AOB_CROSSHAIR_MINOR_TICK_WIDTH = 0.18
 AOB_CROSSHAIR_MAJOR_TICK_WIDTH = 0.30
+SHIP_TRACK_FILL = "#efefef"
+DIST_TRACK_FILL = "#eefcff"
+OPT_TRACK_FILL = "#fff8cc"
+AOB_TRACK_FILL = "#efefef"
 NUMBER_FONT_FAMILY = "Helvetica, Arial, sans-serif"
 TEXT_FONT_FAMILY = "Futura, Avenir Next, Helvetica, sans-serif"
 NUMBER_LABEL_FONT_SIZE = 4.0
@@ -62,27 +75,28 @@ TEXT_LABEL_FONT_SIZE = 4.5
 OPT_TEXT_LABEL_FONT_SIZE = 4.0
 TEXT_SUBLABEL_FONT_SIZE = 3.0
 MARKER_LABEL_FONT_SIZE = 3.4
+MARKER_LABEL_SECONDARY_FONT_SIZE = 3.0
 MARKER_LABEL_CLOCKWISE_OFFSET_DEG = 1.0
 NUMBER_LABEL_BG_COLOR = "white"
-NUMBER_LABEL_BG_OPACITY = 0.50
-NUMBER_LABEL_BG_WIDTH = 1.6
+NUMBER_LABEL_BG_OPACITY = 0.0
+NUMBER_LABEL_BG_WIDTH = 0.0
 AOB_BLUE_MARKER_COLOR = "#1f5fbf"
 AOB_BLUE_MARKER_WIDTH = 0.75
-AOB_BLUE_LABEL_TEXT = "6x"
-AOB_BLUE_LABEL_TEXT_EXTENDED = "15x"
+AOB_BLUE_LABEL_TEXT_LEFT = "6x"
+AOB_BLUE_LABEL_TEXT_RIGHT = "[15x]"
 AOB_BLUE_LABEL_R = 49.0
 AOB_BLUE_LABEL_SPAN_DEG = 8.0
 AOB_GREEN_MARKER_COLOR = "#1f8a3b"
 AOB_GREEN_MARKER_WIDTH = 0.75
 AOB_GREEN_MARKER_CLOCKWISE_DEG = 108.5
-AOB_GREEN_LABEL_TEXT = "1.5x"
-AOB_GREEN_LABEL_TEXT_EXTENDED = "3.8x"
+AOB_GREEN_LABEL_TEXT_LEFT = "1.5x"
+AOB_GREEN_LABEL_TEXT_RIGHT = "[3.8x]"
 AOB_GREEN_LABEL_R = 49.0
 AOB_GREEN_LABEL_SPAN_DEG = 12.0
 AOB_BROWN_MARKER_COLOR = "#8b5a2b"
 AOB_BROWN_MARKER_WIDTH = 0.75
 AOB_BROWN_MARKER_CLOCKWISE_DEG = 180.0
-AOB_BROWN_LABEL_TEXT = "1.5x"
+AOB_BROWN_LABEL_TEXT = "[1.5x]"
 AOB_BROWN_LABEL_R = 49.0
 AOB_BROWN_LABEL_SPAN_DEG = 12.0
 AOB_MARKER_COLOR = "#c62828"
@@ -102,8 +116,6 @@ OPTICAL_OFFSET_MRADS = 0.0
 AOB_MIN_DEG = 5.0
 AOB_MAX_WHEEL_RAD = math.radians(190.0)
 SHIP_ROTATE_OFFSET = math.pi
-BASE_VARIANT_STANDARD = "standard"
-BASE_VARIANT_EXTENDED = "extended"
 
 
 @dataclass(frozen=True)
@@ -149,6 +161,20 @@ def svg_line(x1, y1, x2, y2, w, stroke="black"):
 
 def svg_circle(cx, cy, r):
     return f'<circle cx="{cx:.3f}" cy="{cy:.3f}" r="{r:.3f}" stroke="black" stroke-width="0.20" fill="none" />'
+
+
+def svg_ring(cx, cy, r_outer, r_inner, fill):
+    x_outer_start = cx + r_outer
+    x_inner_start = cx + r_inner
+    return (
+        f'<path d="M {x_outer_start:.3f} {cy:.3f} '
+        f'A {r_outer:.3f} {r_outer:.3f} 0 1 1 {cx - r_outer:.3f} {cy:.3f} '
+        f'A {r_outer:.3f} {r_outer:.3f} 0 1 1 {x_outer_start:.3f} {cy:.3f} '
+        f'M {x_inner_start:.3f} {cy:.3f} '
+        f'A {r_inner:.3f} {r_inner:.3f} 0 1 0 {cx - r_inner:.3f} {cy:.3f} '
+        f'A {r_inner:.3f} {r_inner:.3f} 0 1 0 {x_inner_start:.3f} {cy:.3f} Z" '
+        f'fill="{fill}" stroke="none" fill-rule="evenodd" />'
+    )
 
 
 def svg_arrowhead(tip_x, tip_y, from_x, from_y, fill, length=MARKER_ARROW_LENGTH, width=MARKER_ARROW_WIDTH):
@@ -253,7 +279,7 @@ def get_optical_units_label(optical_tick_type):
 def get_optical_label_arc_bounds(optical_tick_type):
     rotate_cw_deg = 0.0
     if optical_tick_type == OPTICAL_TYPE_MRADS:
-        rotate_cw_deg = OPT_TEXT_MRADS_ROTATE_CCW_DEG
+        rotate_cw_deg = OPT_TEXT_MRADS_ROTATE_CW_DEG
     return (
         OPT_TEXT_START_WHEEL_DEG + rotate_cw_deg,
         OPT_TEXT_END_WHEEL_DEG + rotate_cw_deg,
@@ -288,6 +314,7 @@ def draw_marker_with_arc_label(
     label_text,
     label_color,
     marker_width,
+    label_font_size=MARKER_LABEL_FONT_SIZE,
 ):
     marker_svg_ang = wheel_to_svg_angle(math.radians(wheel_deg % 360.0))
     x1, y1 = polar(CX, CY, AOB_OUTER_BORDER_R, marker_svg_ang)
@@ -310,7 +337,76 @@ def draw_marker_with_arc_label(
         svg_text_on_arc(
             path_id,
             label_text,
-            MARKER_LABEL_FONT_SIZE,
+            label_font_size,
+            NUMBER_FONT_FAMILY,
+            label_color,
+            "0%",
+            "start",
+        )
+    )
+
+
+def draw_marker_with_dual_arc_labels(
+    defs,
+    elems,
+    *,
+    left_path_id,
+    right_path_id,
+    wheel_deg,
+    label_radius,
+    label_span_deg,
+    left_label_text,
+    right_label_text,
+    label_color,
+    marker_width,
+    left_label_font_size=MARKER_LABEL_FONT_SIZE,
+    right_label_font_size=MARKER_LABEL_SECONDARY_FONT_SIZE,
+):
+    marker_svg_ang = wheel_to_svg_angle(math.radians(wheel_deg % 360.0))
+    x1, y1 = polar(CX, CY, AOB_OUTER_BORDER_R, marker_svg_ang)
+    x2, y2 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, marker_svg_ang)
+    elems.append(svg_line(x1, y1, x2, y2, marker_width, label_color))
+    elems.append(svg_arrowhead(x1, y1, x2, y2, label_color))
+    defs.append(
+        svg_path(
+            left_path_id,
+            arc_path_d(
+                CX,
+                CY,
+                label_radius,
+                wheel_deg - MARKER_LABEL_CLOCKWISE_OFFSET_DEG - label_span_deg,
+                wheel_deg - MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
+            ),
+        )
+    )
+    elems.append(
+        svg_text_on_arc(
+            left_path_id,
+            left_label_text,
+            left_label_font_size,
+            NUMBER_FONT_FAMILY,
+            label_color,
+            "100%",
+            "end",
+        )
+    )
+    defs.append(
+        svg_path(
+            right_path_id,
+            arc_path_d(
+                CX,
+                CY,
+                label_radius,
+                wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
+                wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG + label_span_deg,
+            ),
+        )
+    )
+    elems.append(
+        svg_text_on_arc(
+            right_path_id,
+            right_label_text,
+            right_label_font_size,
             NUMBER_FONT_FAMILY,
             label_color,
             "0%",
@@ -499,10 +595,6 @@ def build_distance_ticks():
     return [ticks[k] for k in sorted(ticks)]
 
 
-def build_optical_ticks():
-    return build_optical_ticks_for_type(OPTICAL_TYPE_DEGREES)
-
-
 def build_optical_ticks_for_type(optical_tick_type):
     labels = {
         0.5,
@@ -578,12 +670,14 @@ def build_aob_ticks():
     return [ticks[k] for k in sorted(ticks)]
 
 
-def build_base(optical_tick_type, base_variant=BASE_VARIANT_STANDARD):
+def build_base():
     defs = []
     elems = []
     elems.append(svg_circle(CX, CY, BASE_RADIUS))
     elems.append(svg_circle(CX, CY, PIVOT_RADIUS))
+    elems.append(svg_ring(CX, CY, BASE_RADIUS, SHIP_BORDER_R, SHIP_TRACK_FILL))
     elems.append(svg_circle(CX, CY, SHIP_BORDER_R))
+    elems.append(svg_ring(CX, CY, AOB_OUTER_BORDER_R, AOB_INNER_BORDER_R, AOB_TRACK_FILL))
     elems.append(svg_circle(CX, CY, AOB_OUTER_BORDER_R))
     elems.append(svg_circle(CX, CY, AOB_INNER_BORDER_R))
     elems.append(
@@ -653,88 +747,45 @@ def build_base(optical_tick_type, base_variant=BASE_VARIANT_STANDARD):
         NUMBER_LABEL_FONT_SIZE,
         tick_direction="outward",
     )
-    aob_blue_wheel_deg = 0.0
-    aob_blue_svg_ang = wheel_to_svg_angle(math.radians(aob_blue_wheel_deg))
-    x1, y1 = polar(CX, CY, AOB_OUTER_BORDER_R, aob_blue_svg_ang)
-    x2, y2 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, aob_blue_svg_ang)
-    elems.append(svg_line(x1, y1, x2, y2, AOB_BLUE_MARKER_WIDTH, AOB_BLUE_MARKER_COLOR))
-    elems.append(svg_arrowhead(x1, y1, x2, y2, AOB_BLUE_MARKER_COLOR))
-    defs.append(
-        svg_path(
-            "aob_blue_label_arc",
-            arc_path_d(
-                CX,
-                CY,
-                AOB_BLUE_LABEL_R,
-                aob_blue_wheel_deg
-                - MARKER_LABEL_CLOCKWISE_OFFSET_DEG
-                - AOB_BLUE_LABEL_SPAN_DEG,
-                aob_blue_wheel_deg - MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
-            ),
-        )
+    draw_marker_with_dual_arc_labels(
+        defs,
+        elems,
+        left_path_id="aob_blue_left_label_arc",
+        right_path_id="aob_blue_right_label_arc",
+        wheel_deg=0.0,
+        label_radius=AOB_BLUE_LABEL_R,
+        label_span_deg=AOB_BLUE_LABEL_SPAN_DEG,
+        left_label_text=AOB_BLUE_LABEL_TEXT_LEFT,
+        right_label_text=AOB_BLUE_LABEL_TEXT_RIGHT,
+        label_color=AOB_BLUE_MARKER_COLOR,
+        marker_width=AOB_BLUE_MARKER_WIDTH,
     )
-    blue_label_text = AOB_BLUE_LABEL_TEXT
-    green_label_text = AOB_GREEN_LABEL_TEXT
-    if base_variant == BASE_VARIANT_EXTENDED:
-        blue_label_text = AOB_BLUE_LABEL_TEXT_EXTENDED
-        green_label_text = AOB_GREEN_LABEL_TEXT_EXTENDED
-    elems.append(
-        svg_text_on_arc(
-            "aob_blue_label_arc",
-            blue_label_text,
-            MARKER_LABEL_FONT_SIZE,
-            NUMBER_FONT_FAMILY,
-            AOB_BLUE_MARKER_COLOR,
-            "100%",
-            "end",
-        )
+    draw_marker_with_dual_arc_labels(
+        defs,
+        elems,
+        left_path_id="aob_green_left_label_arc",
+        right_path_id="aob_green_right_label_arc",
+        wheel_deg=AOB_GREEN_MARKER_CLOCKWISE_DEG % 360.0,
+        label_radius=AOB_GREEN_LABEL_R,
+        label_span_deg=AOB_GREEN_LABEL_SPAN_DEG,
+        left_label_text=AOB_GREEN_LABEL_TEXT_LEFT,
+        right_label_text=AOB_GREEN_LABEL_TEXT_RIGHT,
+        label_color=AOB_GREEN_MARKER_COLOR,
+        marker_width=AOB_GREEN_MARKER_WIDTH,
     )
-    aob_green_wheel_deg = AOB_GREEN_MARKER_CLOCKWISE_DEG % 360.0
-    aob_green_svg_ang = wheel_to_svg_angle(math.radians(aob_green_wheel_deg))
-    x5, y5 = polar(CX, CY, AOB_OUTER_BORDER_R, aob_green_svg_ang)
-    x6, y6 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, aob_green_svg_ang)
-    elems.append(
-        svg_line(x5, y5, x6, y6, AOB_GREEN_MARKER_WIDTH, AOB_GREEN_MARKER_COLOR)
+    draw_marker_with_arc_label(
+        defs,
+        elems,
+        path_id="aob_brown_label_arc",
+        wheel_deg=AOB_BROWN_MARKER_CLOCKWISE_DEG,
+        label_radius=AOB_BROWN_LABEL_R,
+        label_span_deg=AOB_BROWN_LABEL_SPAN_DEG,
+        label_text=AOB_BROWN_LABEL_TEXT,
+        label_color=AOB_BROWN_MARKER_COLOR,
+        marker_width=AOB_BROWN_MARKER_WIDTH,
+        label_font_size=MARKER_LABEL_SECONDARY_FONT_SIZE,
     )
-    elems.append(svg_arrowhead(x5, y5, x6, y6, AOB_GREEN_MARKER_COLOR))
-    defs.append(
-        svg_path(
-            "aob_green_label_arc",
-            arc_path_d(
-                CX,
-                CY,
-                AOB_GREEN_LABEL_R,
-                aob_green_wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
-                aob_green_wheel_deg
-                + MARKER_LABEL_CLOCKWISE_OFFSET_DEG
-                + AOB_GREEN_LABEL_SPAN_DEG,
-            ),
-        )
-    )
-    elems.append(
-        svg_text_on_arc(
-            "aob_green_label_arc",
-            green_label_text,
-            MARKER_LABEL_FONT_SIZE,
-            NUMBER_FONT_FAMILY,
-            AOB_GREEN_MARKER_COLOR,
-            "0%",
-            "start",
-        )
-    )
-    if base_variant == BASE_VARIANT_EXTENDED:
-        draw_marker_with_arc_label(
-            defs,
-            elems,
-            path_id="aob_brown_label_arc",
-            wheel_deg=AOB_BROWN_MARKER_CLOCKWISE_DEG,
-            label_radius=AOB_BROWN_LABEL_R,
-            label_span_deg=AOB_BROWN_LABEL_SPAN_DEG,
-            label_text=AOB_BROWN_LABEL_TEXT,
-            label_color=AOB_BROWN_MARKER_COLOR,
-            marker_width=AOB_BROWN_MARKER_WIDTH,
-        )
-    aob_marker_clockwise_deg = get_aob_marker_clockwise_deg(optical_tick_type)
+    aob_marker_clockwise_deg = get_aob_marker_clockwise_deg(OPTICAL_TYPE_DEGREES)
     aob_marker_svg_ang = wheel_to_svg_angle(math.radians(aob_marker_clockwise_deg))
     x7, y7 = polar(CX, CY, AOB_OUTER_BORDER_R, aob_marker_svg_ang)
     x8, y8 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, aob_marker_svg_ang)
@@ -775,12 +826,68 @@ def build_base(optical_tick_type, base_variant=BASE_VARIANT_STANDARD):
     return defs, elems
 
 
-def build_rotor(optical_tick_type):
+def append_optical_track_label(
+    defs,
+    elems,
+    path_id,
+    radius,
+    optical_tick_type,
+    *,
+    include_title=True,
+    units_start_offset=None,
+    units_text_anchor="start",
+):
+    opt_text_start_deg, opt_text_end_deg = get_optical_label_arc_bounds(optical_tick_type)
+    defs.append(
+        svg_path(
+            path_id,
+            arc_path_d(
+                CX,
+                CY,
+                radius,
+                opt_text_start_deg,
+                opt_text_end_deg,
+            ),
+        )
+    )
+    if include_title:
+        elems.append(
+            svg_text_on_arc(
+                path_id,
+                "Optische Länge",
+                OPT_TEXT_LABEL_FONT_SIZE,
+                TEXT_FONT_FAMILY,
+                "black",
+                OPT_TEXT_LABEL_START_OFFSET,
+                "middle",
+            )
+        )
+    units_offset = units_start_offset
+    if units_offset is None:
+        units_offset = get_optical_units_start_offset(optical_tick_type)
+    elems.append(
+        svg_text_on_arc(
+            path_id,
+            get_optical_units_label(optical_tick_type),
+            TEXT_SUBLABEL_FONT_SIZE,
+            TEXT_FONT_FAMILY,
+            "black",
+            units_offset,
+            units_text_anchor,
+        )
+    )
+
+
+def build_rotor():
     defs = []
     elems = []
     elems.append(svg_circle(CX, CY, ROTOR_RADIUS))
     elems.append(svg_circle(CX, CY, PIVOT_RADIUS))
+    elems.append(svg_ring(CX, CY, DIST_BORDER_R, DIST_TRACK_INNER_R, DIST_TRACK_FILL))
+    elems.append(svg_ring(CX, CY, MRAD_BORDER_R, MRAD_TRACK_INNER_R, OPT_TRACK_FILL))
+    elems.append(svg_ring(CX, CY, OPT_BORDER_R, OPT_TRACK_INNER_R, OPT_TRACK_FILL))
     elems.append(svg_circle(CX, CY, DIST_BORDER_R))
+    elems.append(svg_circle(CX, CY, MRAD_BORDER_R))
     elems.append(svg_circle(CX, CY, OPT_BORDER_R))
     draw_scale(
         elems,
@@ -791,7 +898,15 @@ def build_rotor(optical_tick_type):
     )
     draw_scale(
         elems,
-        build_optical_ticks_for_type(optical_tick_type),
+        build_optical_ticks_for_type(OPTICAL_TYPE_MRADS),
+        MRAD_R_OUTER,
+        MRAD_LABEL_R,
+        NUMBER_LABEL_FONT_SIZE,
+        tick_direction="inward",
+    )
+    draw_scale(
+        elems,
+        build_optical_ticks_for_type(OPTICAL_TYPE_DEGREES),
         OPT_R_OUTER,
         OPT_LABEL_R,
         NUMBER_LABEL_FONT_SIZE,
@@ -801,41 +916,17 @@ def build_rotor(optical_tick_type):
     elems.append(
         svg_text_on_arc("dist_arc", "Entfernung in Hundertmeter", TEXT_LABEL_FONT_SIZE)
     )
-    opt_text_start_deg, opt_text_end_deg = get_optical_label_arc_bounds(optical_tick_type)
-    defs.append(
-        svg_path(
-            "opt_arc",
-            arc_path_d(
-                CX,
-                CY,
-                OPT_TEXT_R,
-                opt_text_start_deg,
-                opt_text_end_deg,
-            ),
-        )
+    append_optical_track_label(
+        defs,
+        elems,
+        "mrad_arc",
+        MRAD_TEXT_R,
+        OPTICAL_TYPE_MRADS,
+        include_title=False,
+        units_start_offset=MRAD_UNITS_START_OFFSET,
+        units_text_anchor="start",
     )
-    elems.append(
-        svg_text_on_arc(
-            "opt_arc",
-            "Optische Länge",
-            OPT_TEXT_LABEL_FONT_SIZE,
-            TEXT_FONT_FAMILY,
-            "black",
-            OPT_TEXT_LABEL_START_OFFSET,
-            "middle",
-        )
-    )
-    elems.append(
-        svg_text_on_arc(
-            "opt_arc",
-            get_optical_units_label(optical_tick_type),
-            TEXT_SUBLABEL_FONT_SIZE,
-            TEXT_FONT_FAMILY,
-            "black",
-            get_optical_units_start_offset(optical_tick_type),
-            "start",
-        )
-    )
+    append_optical_track_label(defs, elems, "opt_arc", OPT_TEXT_R, OPTICAL_TYPE_DEGREES)
     return defs, elems
 
 
@@ -859,48 +950,13 @@ def write_svg(name, defs, elements):
     with open(name, "w", encoding="utf-8") as f:
         f.write(content)
 
-
-def output_suffix(optical_tick_type):
-    if optical_tick_type == OPTICAL_TYPE_MRADS:
-        return "mrads"
-    return "degrees"
-
-
-def generate_variant(optical_tick_type):
-    suffix = output_suffix(optical_tick_type)
-    base_defs, base_elems = build_base(optical_tick_type)
-    rotor_defs, rotor_elems = build_rotor(optical_tick_type)
-    write_svg(f"raobf_base_{suffix}.svg", base_defs, base_elems)
-    write_svg(f"raobf_rotor_{suffix}.svg", rotor_defs, rotor_elems)
-    write_svg(
-        f"raobf_composite_{suffix}.svg",
-        base_defs + rotor_defs,
-        base_elems + rotor_elems,
-    )
-
-
-def generate_extended_variant():
-    base_defs, base_elems = build_base(OPTICAL_TYPE_MRADS, BASE_VARIANT_EXTENDED)
-    rotor_defs, rotor_elems = build_rotor(OPTICAL_TYPE_MRADS)
-    write_svg("raobf_base_mrads_extended.svg", base_defs, base_elems)
-    write_svg(
-        "raobf_composite_mrads_extended.svg",
-        base_defs + rotor_defs,
-        base_elems + rotor_elems,
-    )
-
-
 def main():
-    generate_variant(OPTICAL_TYPE_DEGREES)
-    generate_variant(OPTICAL_TYPE_MRADS)
-    generate_extended_variant()
-    print(
-        "Generated raobf_base_degrees.svg, raobf_rotor_degrees.svg, "
-        "raobf_composite_degrees.svg, raobf_base_mrads.svg, "
-        "raobf_rotor_mrads.svg, raobf_composite_mrads.svg, "
-        "raobf_base_mrads_extended.svg, and "
-        "raobf_composite_mrads_extended.svg"
-    )
+    base_defs, base_elems = build_base()
+    rotor_defs, rotor_elems = build_rotor()
+    write_svg("raobf_base.svg", base_defs, base_elems)
+    write_svg("raobf_rotor.svg", rotor_defs, rotor_elems)
+    write_svg("raobf_composite.svg", base_defs + rotor_defs, base_elems + rotor_elems)
+    print("Generated raobf_base.svg, raobf_rotor.svg, and raobf_composite.svg")
 
 
 if __name__ == "__main__":
