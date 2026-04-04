@@ -1,15 +1,26 @@
-# RAOBF Wheel SVG Generator
+# Enhanced RAOBF Wheel SVG Generator
 
-This project contains a Python script that generates a WWII-style RAOBF wheel as SVG artwork.
+This project include SVG templates and the Python script used to generate these SVG files, for building
+a hand-held RAOBF (Range and Angle On Bow Finder) slide rule calculator to use with WWII submarine simulators such as Silent Hunter 3 and U-Boat.  It is enhanced from original RAOBF to include two scales for the optical angle:
+degrees and milliradians.  This is because using a realistic periscope mod will have a vertical stadimeter in 
+milliradians, and horizontal reticle in degrees; so being able to convert from both scales on the same wheel
+becomes handy.
+
+The wheel also includes reference markers for both normal periscope zoom levels (1.5x and 6x) and for the extended periscope zoom levels for the U-Boat game (1.5x, 3.8x, and 15x), to correctly position the optical length value.
+
+There is also a speed calculator marker (in knots). To calculate speed, rotate the ship transit time (in seconds) on the hectometer distance scale to the ship length/meters on the outer scale, then read the optical degrees value indicated by the 'kts' marker line.
+
+These scales are generated with the underlying logarithmic equations from the trigonometric formulas, and fixes a few inaccuracies in the original RAOBF dials, such as correct position of tick marks (the 80-degree tick mark between 70 and 90 degrees on the AOB scale, for instance) on a logarithmic scale.
 
 The generator creates three files:
 
 - `raobf_base.svg`: fixed base disc
-- `raobf_rotor.svg`: rotating overlay disc
-- `raobf_composite.svg`: combined view of base and rotor
+- `raobf_rotor.svg`: rotating overlay disc (to print on transparent film)
+- `raobf_composite.svg`: combined view of base and rotor (mainly for visual diagnostics of the script output)
 
 ## Requirements
 
+If you want to modify the output of the SVG templates, the script will require:
 - Python 3
 
 ## Usage
@@ -31,32 +42,3 @@ This writes the combined wheel artwork:
 - `raobf_generator.py`: main generator script
 - `.gitignore`: project ignore rules
 
-## What The Script Controls
-
-The script is organized around editable constants near the top of the file. These include:
-
-- overall disc radii and scale radii
-- numeric label radii and curved text radii
-- font families and font sizes
-- tick lengths and stroke widths
-- curved section-label placement
-- colored marker lines, arrows, and marker-label placement
-- AOB crosshair and crosshair tick settings
-
-## Current Features
-
-- separate base and rotor SVG generation
-- composite SVG generation
-- curved section labels using SVG `textPath`
-- configurable ship, distance, optical-length, and AOB scales
-- mirrored tick/label placement where needed
-- guide circles for selected scale bands
-- colored blue, green, and red reference markers with arrowheads
-- curved labels for marker annotations
-- AOB inner-circle crosshairs with graduated tick marks
-
-## Notes
-
-- Generated SVG files are ignored by git via `.gitignore`.
-- Font appearance depends on the fonts installed on the local system.
-- If a newly installed font does not appear in Chrome immediately, fully quit and reopen Chrome and refresh the SVG.
