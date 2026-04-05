@@ -82,23 +82,25 @@ NUMBER_LABEL_BG_OPACITY = 0.0
 NUMBER_LABEL_BG_WIDTH = 0.0
 AOB_BLUE_MARKER_COLOR = "#1f5fbf"
 AOB_BLUE_MARKER_WIDTH = 0.75
-AOB_BLUE_LABEL_TEXT_LEFT = "6x"
-AOB_BLUE_LABEL_TEXT_RIGHT = "[15x]"
+AOB_BLUE_LABEL_TEXT = "6x"
 AOB_BLUE_LABEL_R = 49.0
 AOB_BLUE_LABEL_SPAN_DEG = 8.0
 AOB_GREEN_MARKER_COLOR = "#1f8a3b"
 AOB_GREEN_MARKER_WIDTH = 0.75
 AOB_GREEN_MARKER_CLOCKWISE_DEG = 108.5
-AOB_GREEN_LABEL_TEXT_LEFT = "1.5x"
-AOB_GREEN_LABEL_TEXT_RIGHT = "[3.8x]"
+AOB_GREEN_LABEL_TEXT = "1.5x"
 AOB_GREEN_LABEL_R = 49.0
 AOB_GREEN_LABEL_SPAN_DEG = 12.0
 AOB_BROWN_MARKER_COLOR = "#8b5a2b"
 AOB_BROWN_MARKER_WIDTH = 0.75
-AOB_BROWN_MARKER_CLOCKWISE_DEG = 180.0
-AOB_BROWN_LABEL_TEXT = "[1.5x]"
+AOB_BROWN_LABEL_TEXT = "3.8x"
 AOB_BROWN_LABEL_R = 49.0
 AOB_BROWN_LABEL_SPAN_DEG = 12.0
+AOB_PURPLE_MARKER_COLOR = "#6a3dad"
+AOB_PURPLE_MARKER_WIDTH = 0.75
+AOB_PURPLE_LABEL_TEXT = "15x"
+AOB_PURPLE_LABEL_R = 49.0
+AOB_PURPLE_LABEL_SPAN_DEG = 10.0
 AOB_MARKER_COLOR = "#c62828"
 AOB_MARKER_WIDTH = 0.75
 AOB_MARKER_CLOCKWISE_DEG_BASE = 13.0
@@ -303,6 +305,10 @@ def get_aob_marker_clockwise_deg(optical_tick_type):
     return (AOB_MARKER_CLOCKWISE_DEG_BASE + optical_rotation_delta_deg) % 360.0
 
 
+def wheel_deg_for_optical_value(value, optical_tick_type):
+    return math.degrees(theta_optical(value, optical_tick_type)) % 360.0
+
+
 def draw_marker_with_arc_label(
     defs,
     elems,
@@ -338,75 +344,6 @@ def draw_marker_with_arc_label(
             path_id,
             label_text,
             label_font_size,
-            NUMBER_FONT_FAMILY,
-            label_color,
-            "0%",
-            "start",
-        )
-    )
-
-
-def draw_marker_with_dual_arc_labels(
-    defs,
-    elems,
-    *,
-    left_path_id,
-    right_path_id,
-    wheel_deg,
-    label_radius,
-    label_span_deg,
-    left_label_text,
-    right_label_text,
-    label_color,
-    marker_width,
-    left_label_font_size=MARKER_LABEL_FONT_SIZE,
-    right_label_font_size=MARKER_LABEL_SECONDARY_FONT_SIZE,
-):
-    marker_svg_ang = wheel_to_svg_angle(math.radians(wheel_deg % 360.0))
-    x1, y1 = polar(CX, CY, AOB_OUTER_BORDER_R, marker_svg_ang)
-    x2, y2 = polar(CX, CY, AOB_INNER_BORDER_R - AOB_MARKER_INNER_EXTENSION, marker_svg_ang)
-    elems.append(svg_line(x1, y1, x2, y2, marker_width, label_color))
-    elems.append(svg_arrowhead(x1, y1, x2, y2, label_color))
-    defs.append(
-        svg_path(
-            left_path_id,
-            arc_path_d(
-                CX,
-                CY,
-                label_radius,
-                wheel_deg - MARKER_LABEL_CLOCKWISE_OFFSET_DEG - label_span_deg,
-                wheel_deg - MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
-            ),
-        )
-    )
-    elems.append(
-        svg_text_on_arc(
-            left_path_id,
-            left_label_text,
-            left_label_font_size,
-            NUMBER_FONT_FAMILY,
-            label_color,
-            "100%",
-            "end",
-        )
-    )
-    defs.append(
-        svg_path(
-            right_path_id,
-            arc_path_d(
-                CX,
-                CY,
-                label_radius,
-                wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG,
-                wheel_deg + MARKER_LABEL_CLOCKWISE_OFFSET_DEG + label_span_deg,
-            ),
-        )
-    )
-    elems.append(
-        svg_text_on_arc(
-            right_path_id,
-            right_label_text,
-            right_label_font_size,
             NUMBER_FONT_FAMILY,
             label_color,
             "0%",
@@ -747,29 +684,25 @@ def build_base():
         NUMBER_LABEL_FONT_SIZE,
         tick_direction="outward",
     )
-    draw_marker_with_dual_arc_labels(
+    draw_marker_with_arc_label(
         defs,
         elems,
-        left_path_id="aob_blue_left_label_arc",
-        right_path_id="aob_blue_right_label_arc",
+        path_id="aob_blue_label_arc",
         wheel_deg=0.0,
         label_radius=AOB_BLUE_LABEL_R,
         label_span_deg=AOB_BLUE_LABEL_SPAN_DEG,
-        left_label_text=AOB_BLUE_LABEL_TEXT_LEFT,
-        right_label_text=AOB_BLUE_LABEL_TEXT_RIGHT,
+        label_text=AOB_BLUE_LABEL_TEXT,
         label_color=AOB_BLUE_MARKER_COLOR,
         marker_width=AOB_BLUE_MARKER_WIDTH,
     )
-    draw_marker_with_dual_arc_labels(
+    draw_marker_with_arc_label(
         defs,
         elems,
-        left_path_id="aob_green_left_label_arc",
-        right_path_id="aob_green_right_label_arc",
+        path_id="aob_green_label_arc",
         wheel_deg=AOB_GREEN_MARKER_CLOCKWISE_DEG % 360.0,
         label_radius=AOB_GREEN_LABEL_R,
         label_span_deg=AOB_GREEN_LABEL_SPAN_DEG,
-        left_label_text=AOB_GREEN_LABEL_TEXT_LEFT,
-        right_label_text=AOB_GREEN_LABEL_TEXT_RIGHT,
+        label_text=AOB_GREEN_LABEL_TEXT,
         label_color=AOB_GREEN_MARKER_COLOR,
         marker_width=AOB_GREEN_MARKER_WIDTH,
     )
@@ -777,13 +710,24 @@ def build_base():
         defs,
         elems,
         path_id="aob_brown_label_arc",
-        wheel_deg=AOB_BROWN_MARKER_CLOCKWISE_DEG,
+        wheel_deg=wheel_deg_for_optical_value(25.0, OPTICAL_TYPE_MRADS),
         label_radius=AOB_BROWN_LABEL_R,
         label_span_deg=AOB_BROWN_LABEL_SPAN_DEG,
         label_text=AOB_BROWN_LABEL_TEXT,
         label_color=AOB_BROWN_MARKER_COLOR,
         marker_width=AOB_BROWN_MARKER_WIDTH,
         label_font_size=MARKER_LABEL_SECONDARY_FONT_SIZE,
+    )
+    draw_marker_with_arc_label(
+        defs,
+        elems,
+        path_id="aob_purple_label_arc",
+        wheel_deg=wheel_deg_for_optical_value(1.0, OPTICAL_TYPE_MRADS),
+        label_radius=AOB_PURPLE_LABEL_R,
+        label_span_deg=AOB_PURPLE_LABEL_SPAN_DEG,
+        label_text=AOB_PURPLE_LABEL_TEXT,
+        label_color=AOB_PURPLE_MARKER_COLOR,
+        marker_width=AOB_PURPLE_MARKER_WIDTH,
     )
     aob_marker_clockwise_deg = get_aob_marker_clockwise_deg(OPTICAL_TYPE_DEGREES)
     aob_marker_svg_ang = wheel_to_svg_angle(math.radians(aob_marker_clockwise_deg))
