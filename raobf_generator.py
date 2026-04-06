@@ -274,7 +274,7 @@ def get_optical_offset(optical_tick_type):
 
 def get_optical_units_label(optical_tick_type):
     if optical_tick_type == OPTICAL_TYPE_MRADS:
-        return "(mrads)"
+        return "(10 mrads)"
     return "(degrees)"
 
 
@@ -296,6 +296,10 @@ def get_optical_units_start_offset(optical_tick_type):
 
 def theta_optical(l, optical_tick_type):
     return (get_optical_offset(optical_tick_type) + K * math.log(40.0 / l)) % (2.0 * math.pi)
+
+
+def theta_optical_display(l, optical_tick_type):
+    return theta_optical(l, optical_tick_type)
 
 
 def get_aob_marker_clockwise_deg(optical_tick_type):
@@ -496,9 +500,9 @@ def build_distance_ticks():
     ticks = {}
     for v in labels:
         add_tick(ticks, v, theta_distance, "major", fmt_num(v))
-    for v in frange(2.0, 3.0, 0.2):
+    for v in frange(2.0, 3.0, 0.1):
         if v not in labels:
-            add_tick(ticks, v, theta_distance, "thin")
+            add_tick(ticks, v, theta_distance, "thick")
     for v in frange(3.0, 5.0, 0.1):
         if v in labels:
             continue
@@ -558,9 +562,12 @@ def build_optical_ticks_for_type(optical_tick_type):
         40,
     }
     ticks = {}
-    optical_theta = lambda value: theta_optical(value, optical_tick_type)
+    optical_theta = lambda value: theta_optical_display(value, optical_tick_type)
     for v in labels:
         add_tick(ticks, v, optical_theta, "major", fmt_num(v))
+    if optical_tick_type == OPTICAL_TYPE_MRADS:
+        for v in frange(0.1, 0.5, 0.1):
+            add_tick(ticks, v, optical_theta, "thick")
     for v in frange(0.5, 1.5, 0.05):
         if v in labels:
             continue
