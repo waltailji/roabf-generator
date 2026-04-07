@@ -22,7 +22,7 @@ This RAOBF wheel comes in two components: the base and the rotor.  The base is f
 
 Multiple SVG and PDF files are supplied in this project for printing the wheel components.  The PDF files are scaled by 89% to best fit my needs.  The file list are:
 
-* raobf_composite - this is a composite of both the base and rotator wheel, mostly for testing purposes.
+* raobf_composite - this is a composite of both the base and rotator wheel, mostly for testing the output layout during development of the Python script.
 * raobf_base - the base, non-rotating portion of the RAOBF wheel and includes the outer ship height/length scale and inner AOB scale.
 * raobf_rotor - the rotating portion of the RAOBF wheel which contains the distance and three optical length scales.
 * raobf_rotor_reverser - same as 'raobf_rotor' but in reverse; I found that the rotor looks better when the sticker is placed on the reverse side so that the obverse looks smooth and crisp.
