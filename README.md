@@ -12,10 +12,11 @@ There is also a speed calculator marker (in knots). To calculate speed, rotate t
 
 These scales are generated with the underlying logarithmic equations from the trigonometric formulas, and fixes a few inaccuracies in the original RAOBF dials, such as correct position of tick marks (the 80-degree tick mark between 70 and 90 degrees on the AOB scale, for instance) on a logarithmic scale.
 
-The generator creates three files:
+The generator creates four files:
 
 - `raobf_base.svg`: fixed base disc
 - `raobf_rotor.svg`: rotating overlay disc (to print on transparent film)
+- `raobf_rotor_reverse.svg`: mirrored rotor overlay disc (to print on the reverse side of transparent film)
 - `raobf_composite.svg`: combined view of base and rotor (mainly for visual diagnostics of the script output)
 
 ## Requirements
@@ -35,10 +36,10 @@ This writes the combined wheel artwork:
 
 - `raobf_base.svg`
 - `raobf_rotor.svg`
+- `raobf_rotor_reverse.svg`
 - `raobf_composite.svg`
 
 ## Files
 
 - `raobf_generator.py`: main generator script
 - `.gitignore`: project ignore rules
-

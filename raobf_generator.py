@@ -4,32 +4,37 @@ RAOBF wheel SVG generator with curved arc labels.
 Outputs:
   - raobf_base.svg
   - raobf_rotor.svg
+  - raobf_rotor_reverse.svg
   - raobf_composite.svg
 """
 
 import math
 from dataclasses import dataclass
 
-PAGE_W = 220.0
-PAGE_H = 220.0
+PAGE_W = 235.5
+PAGE_H = 235.5
 CX = PAGE_W / 2.0
 CY = PAGE_H / 2.0
 
-BASE_RADIUS = 96.0
-ROTOR_RADIUS = 95.0
+BASE_RADIUS = 103.25
+ROTOR_RADIUS = 102.25
 PIVOT_RADIUS = 2.25
 
-SHIP_R_OUTER = 86.0
-SHIP_LABEL_R = 90.0
-BASIS_TEXT_R = 89.0
+SHIP_R_OUTER = 93.25
+SHIP_LABEL_R = 97.25
+BASIS_TEXT_R = 96.25
 
-DIST_R_OUTER = 85.0
-DIST_LABEL_R = 80.0
-DIST_TEXT_R = 80.0
+DIST_R_OUTER = 92.25
+DIST_LABEL_R = 87.25
+DIST_TEXT_R = 87.25
 
-MRAD_R_OUTER = 76.5
-MRAD_LABEL_R = 71.5
-MRAD_TEXT_R = 71.5
+MRAD_R_OUTER = 83.75
+MRAD_LABEL_R = 78.75
+MRAD_TEXT_R = 78.75
+
+MINUTE_R_OUTER = 75.5
+MINUTE_LABEL_R = 70.5
+MINUTE_TEXT_R = 70.5
 
 OPT_R_OUTER = 62.0
 OPT_LABEL_R = 66.0
@@ -39,12 +44,14 @@ OPT_TEXT_END_WHEEL_DEG = 292.0
 OPT_TEXT_MRADS_ROTATE_CW_DEG = 44.0
 OPT_TEXT_LABEL_START_OFFSET = "46%"
 MRAD_UNITS_START_OFFSET = "10%"
+MINUTE_UNITS_START_OFFSET = "10%"
 
 AOB_R_OUTER = 61.0
 AOB_LABEL_R = 56.0
 AOB_TEXT_R = 55.0
 DIST_TRACK_INNER_R = MRAD_R_OUTER
-MRAD_TRACK_INNER_R = OPT_R_OUTER
+MRAD_TRACK_INNER_R = MINUTE_R_OUTER
+MINUTE_TRACK_INNER_R = OPT_R_OUTER
 OPT_TRACK_INNER_R = 61.8
 
 TICK_LENGTHS = {"major": 2.5, "thick": 1.25, "thin": 0.625}
@@ -52,6 +59,7 @@ STROKE_WIDTHS = {"major": 0.35, "thick": 0.35, "thin": 0.18}
 SHIP_BORDER_R = SHIP_R_OUTER
 DIST_BORDER_R = DIST_R_OUTER
 MRAD_BORDER_R = MRAD_R_OUTER
+MINUTE_BORDER_R = MINUTE_R_OUTER
 OPT_BORDER_R = OPT_R_OUTER
 AOB_OUTER_BORDER_R = AOB_R_OUTER
 AOB_INNER_BORDER_R = AOB_R_OUTER - 8
@@ -77,6 +85,7 @@ TEXT_SUBLABEL_FONT_SIZE = 3.0
 MARKER_LABEL_FONT_SIZE = 3.4
 MARKER_LABEL_SECONDARY_FONT_SIZE = 3.0
 MARKER_LABEL_CLOCKWISE_OFFSET_DEG = 1.0
+ZOOM_HAIRLINE_WIDTH = 0.25
 NUMBER_LABEL_BG_COLOR = "white"
 NUMBER_LABEL_BG_OPACITY = 0.0
 NUMBER_LABEL_BG_WIDTH = 0.0
@@ -113,8 +122,10 @@ MARKER_ARROW_WIDTH = 1.9
 K = math.pi / math.log(10.0)
 OPTICAL_TYPE_MRADS = 1
 OPTICAL_TYPE_DEGREES = 2
+OPTICAL_TYPE_MINUTES = 3
 OPTICAL_OFFSET_DEGREES = math.radians(316.0)
 OPTICAL_OFFSET_MRADS = 0.0
+OPTICAL_OFFSET_MINUTES = OPTICAL_OFFSET_DEGREES + K * math.log(1.6)
 AOB_MIN_DEG = 5.0
 AOB_MAX_WHEEL_RAD = math.radians(190.0)
 SHIP_ROTATE_OFFSET = math.pi
@@ -269,12 +280,16 @@ def theta_distance(d):
 def get_optical_offset(optical_tick_type):
     if optical_tick_type == OPTICAL_TYPE_MRADS:
         return OPTICAL_OFFSET_MRADS
+    if optical_tick_type == OPTICAL_TYPE_MINUTES:
+        return OPTICAL_OFFSET_MINUTES
     return OPTICAL_OFFSET_DEGREES
 
 
 def get_optical_units_label(optical_tick_type):
     if optical_tick_type == OPTICAL_TYPE_MRADS:
-        return "(10 mrads)"
+        return "(10 mrads, '/17.45&#176;' scope)"
+    if optical_tick_type == OPTICAL_TYPE_MINUTES:
+        return "(10 x 1/60&#176;)"
     return "(degrees)"
 
 
@@ -282,6 +297,9 @@ def get_optical_label_arc_bounds(optical_tick_type):
     rotate_cw_deg = 0.0
     if optical_tick_type == OPTICAL_TYPE_MRADS:
         rotate_cw_deg = OPT_TEXT_MRADS_ROTATE_CW_DEG
+    if optical_tick_type == OPTICAL_TYPE_MINUTES:
+        label_start_deg = math.degrees(theta_optical(1.0, optical_tick_type)) - 2.0
+        return (label_start_deg, label_start_deg + 50.0)
     return (
         OPT_TEXT_START_WHEEL_DEG + rotate_cw_deg,
         OPT_TEXT_END_WHEEL_DEG + rotate_cw_deg,
@@ -291,6 +309,8 @@ def get_optical_label_arc_bounds(optical_tick_type):
 def get_optical_units_start_offset(optical_tick_type):
     if optical_tick_type == OPTICAL_TYPE_MRADS:
         return "81%"
+    if optical_tick_type == OPTICAL_TYPE_MINUTES:
+        return MINUTE_UNITS_START_OFFSET
     return "75%"
 
 
@@ -354,6 +374,13 @@ def draw_marker_with_arc_label(
             "start",
         )
     )
+
+
+def draw_radial_hairline(elements, wheel_deg, inner_radius, outer_radius, stroke):
+    svg_ang = wheel_to_svg_angle(math.radians(wheel_deg % 360.0))
+    x1, y1 = polar(CX, CY, inner_radius, svg_ang)
+    x2, y2 = polar(CX, CY, outer_radius, svg_ang)
+    elements.append(svg_line(x1, y1, x2, y2, ZOOM_HAIRLINE_WIDTH, stroke))
 
 
 def theta_aob(aob_deg):
@@ -565,7 +592,7 @@ def build_optical_ticks_for_type(optical_tick_type):
     optical_theta = lambda value: theta_optical_display(value, optical_tick_type)
     for v in labels:
         add_tick(ticks, v, optical_theta, "major", fmt_num(v))
-    if optical_tick_type == OPTICAL_TYPE_MRADS:
+    if optical_tick_type in (OPTICAL_TYPE_MRADS, OPTICAL_TYPE_MINUTES):
         for v in frange(0.1, 0.5, 0.1):
             add_tick(ticks, v, optical_theta, "thick")
     for v in frange(0.5, 1.5, 0.05):
@@ -690,6 +717,34 @@ def build_base():
         SHIP_LABEL_R,
         NUMBER_LABEL_FONT_SIZE,
         tick_direction="outward",
+    )
+    draw_radial_hairline(
+        elems,
+        0.0,
+        AOB_OUTER_BORDER_R,
+        SHIP_BORDER_R,
+        AOB_BLUE_MARKER_COLOR,
+    )
+    draw_radial_hairline(
+        elems,
+        AOB_GREEN_MARKER_CLOCKWISE_DEG,
+        AOB_OUTER_BORDER_R,
+        SHIP_BORDER_R,
+        AOB_GREEN_MARKER_COLOR,
+    )
+    draw_radial_hairline(
+        elems,
+        wheel_deg_for_optical_value(25.0, OPTICAL_TYPE_MRADS),
+        AOB_OUTER_BORDER_R,
+        SHIP_BORDER_R,
+        AOB_BROWN_MARKER_COLOR,
+    )
+    draw_radial_hairline(
+        elems,
+        wheel_deg_for_optical_value(1.0, OPTICAL_TYPE_MRADS),
+        AOB_OUTER_BORDER_R,
+        SHIP_BORDER_R,
+        AOB_PURPLE_MARKER_COLOR,
     )
     draw_marker_with_arc_label(
         defs,
@@ -836,9 +891,11 @@ def build_rotor():
     elems.append(svg_circle(CX, CY, PIVOT_RADIUS))
     elems.append(svg_ring(CX, CY, DIST_BORDER_R, DIST_TRACK_INNER_R, DIST_TRACK_FILL))
     elems.append(svg_ring(CX, CY, MRAD_BORDER_R, MRAD_TRACK_INNER_R, OPT_TRACK_FILL))
+    elems.append(svg_ring(CX, CY, MINUTE_BORDER_R, MINUTE_TRACK_INNER_R, OPT_TRACK_FILL))
     elems.append(svg_ring(CX, CY, OPT_BORDER_R, OPT_TRACK_INNER_R, OPT_TRACK_FILL))
     elems.append(svg_circle(CX, CY, DIST_BORDER_R))
     elems.append(svg_circle(CX, CY, MRAD_BORDER_R))
+    elems.append(svg_circle(CX, CY, MINUTE_BORDER_R))
     elems.append(svg_circle(CX, CY, OPT_BORDER_R))
     draw_scale(
         elems,
@@ -852,6 +909,14 @@ def build_rotor():
         build_optical_ticks_for_type(OPTICAL_TYPE_MRADS),
         MRAD_R_OUTER,
         MRAD_LABEL_R,
+        NUMBER_LABEL_FONT_SIZE,
+        tick_direction="inward",
+    )
+    draw_scale(
+        elems,
+        build_optical_ticks_for_type(OPTICAL_TYPE_MINUTES),
+        MINUTE_R_OUTER,
+        MINUTE_LABEL_R,
         NUMBER_LABEL_FONT_SIZE,
         tick_direction="inward",
     )
@@ -877,14 +942,27 @@ def build_rotor():
         units_start_offset=MRAD_UNITS_START_OFFSET,
         units_text_anchor="start",
     )
+    append_optical_track_label(
+        defs,
+        elems,
+        "minute_arc",
+        MINUTE_TEXT_R,
+        OPTICAL_TYPE_MINUTES,
+        include_title=False,
+        units_start_offset=MINUTE_UNITS_START_OFFSET,
+        units_text_anchor="start",
+    )
     append_optical_track_label(defs, elems, "opt_arc", OPT_TEXT_R, OPTICAL_TYPE_DEGREES)
     return defs, elems
 
 
-def write_svg(name, defs, elements):
+def write_svg(name, defs, elements, group_transform=None):
     defs_block = ""
     if defs:
         defs_block = "<defs>" + "".join(defs) + "</defs>"
+    transform_attr = ""
+    if group_transform is not None:
+        transform_attr = f' transform="{group_transform}"'
     content = (
         f'<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg"\n'
@@ -893,7 +971,7 @@ def write_svg(name, defs, elements):
         f'     height="{PAGE_H}mm"\n'
         f'     viewBox="0 0 {PAGE_W} {PAGE_H}">\n'
         f"  {defs_block}\n"
-        f"  <g>\n"
+        f"  <g{transform_attr}>\n"
         f"    {''.join(elements)}\n"
         f"  </g>\n"
         f"</svg>\n"
@@ -906,8 +984,17 @@ def main():
     rotor_defs, rotor_elems = build_rotor()
     write_svg("raobf_base.svg", base_defs, base_elems)
     write_svg("raobf_rotor.svg", rotor_defs, rotor_elems)
+    write_svg(
+        "raobf_rotor_reverse.svg",
+        rotor_defs,
+        rotor_elems,
+        group_transform=f"translate({PAGE_W:.3f} 0) scale(-1 1)",
+    )
     write_svg("raobf_composite.svg", base_defs + rotor_defs, base_elems + rotor_elems)
-    print("Generated raobf_base.svg, raobf_rotor.svg, and raobf_composite.svg")
+    print(
+        "Generated raobf_base.svg, raobf_rotor.svg, "
+        "raobf_rotor_reverse.svg, and raobf_composite.svg"
+    )
 
 
 if __name__ == "__main__":
