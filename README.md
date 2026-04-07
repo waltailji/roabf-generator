@@ -38,6 +38,14 @@ Materials I chose to use on my first iteration of making my wheel:
 
 Helpful tools include a circle cutter, paper cutter, utility knife, and hole punch or electric drill.
 
+## RAOBF Usage Resources:
+
+Plenty of instructions are already available on the web and YouTube on how to use an RAOBF wheel.  Although my enhanced wheel looks a little different and has multiple scales for optical length, the principles are the same.  I may come up with my own instructions at some point, but in the meantime here are a few resources that I myself have found useful:
+
+* [RAOBF Cheat Sheet](https://www.subsim.com/radioroom/showthread.php?t=236013)
+* [ZallZalls Ultimate U-Boat Guide](https://steamcommunity.com/sharedfiles/filedetails/?id=1541073853)
+* [The RAOBF Wheel In Silent Hunter 5 > 3 YouTube Tutorials + Instructions](https://www.subsim.com/radioroom/showpost.php?p=2265301)
+
 # Python script
 
 If desired, the Python script used to generate these SVGs is included in case you want to modify/customize the RAOBF wheel to your liking.
