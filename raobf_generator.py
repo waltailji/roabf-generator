@@ -287,9 +287,9 @@ def get_optical_offset(optical_tick_type):
 
 def get_optical_units_label(optical_tick_type):
     if optical_tick_type == OPTICAL_TYPE_MRADS:
-        return "(10 mrads, '/17.45&#176;' scope)"
+        return "(10 mrads, aka 10x 1/17.45&#176;)"
     if optical_tick_type == OPTICAL_TYPE_MINUTES:
-        return "(10 x 1/60&#176;)"
+        return "(10x 1/16&#176;)"
     return "(degrees)"
 
 
