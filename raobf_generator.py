@@ -722,28 +722,28 @@ def build_base():
         elems,
         0.0,
         AOB_OUTER_BORDER_R,
-        MRAD_BORDER_R,
+        SHIP_BORDER_R,
         AOB_BLUE_MARKER_COLOR,
     )
     draw_radial_hairline(
         elems,
         AOB_GREEN_MARKER_CLOCKWISE_DEG,
         AOB_OUTER_BORDER_R,
-        MRAD_BORDER_R,
+        SHIP_BORDER_R,
         AOB_GREEN_MARKER_COLOR,
     )
     draw_radial_hairline(
         elems,
         wheel_deg_for_optical_value(25.0, OPTICAL_TYPE_MRADS),
         AOB_OUTER_BORDER_R,
-        MRAD_BORDER_R,
+        SHIP_BORDER_R,
         AOB_BROWN_MARKER_COLOR,
     )
     draw_radial_hairline(
         elems,
         wheel_deg_for_optical_value(1.0, OPTICAL_TYPE_MRADS),
         AOB_OUTER_BORDER_R,
-        MRAD_BORDER_R,
+        SHIP_BORDER_R,
         AOB_PURPLE_MARKER_COLOR,
     )
     draw_marker_with_arc_label(
